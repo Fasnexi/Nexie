@@ -1,0 +1,36 @@
+name: Unzip Archive and Commit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unzip-and-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Unzip archive
+        run: |
+          unzip -q fasnexi-phase1-hardened-build-v2.zip -d extracted-content
+
+      - name: Create directory structure
+        run: |
+          mkdir -p fasnexi-phase1-hardened-build-v2
+          mv extracted-content/* fasnexi-phase1-hardened-build-v2/ || true
+          rm -rf extracted-content
+
+      - name: Configure git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push changes
+        run: |
+          git add fasnexi-phase1-hardened-build-v2/
+          git commit -m "Extract fasnexi-phase1-hardened-build-v2.zip contents"
+          git push origin main
+        continue-on-error: true
